@@ -1,0 +1,55 @@
+{
+    "types": [
+    {
+      "type": "layer",
+      "displayName": "Layer",
+      "icon": "Layers",
+      "defaults": { "name": "Layer", "expanded": true },
+      "allowedChildren": ["container", "text", "image", "3d"],
+      "actions": [
+        { "id": "duplicate", "label": "Duplicate", "run": "duplicate" },
+        { "id": "delete", "label": "Delete", "run": "remove" }
+      ],
+      "events": { "onClick": "select" }
+    },
+    {
+      "type": "container",
+      "displayName": "Container",
+      "icon": "Box",
+      "defaults": { "name": "Container", "expanded": true, "props": { "layout": "flex" } },
+      "allowedChildren": ["text", "image", "3d"],
+      "actions": [{ "id": "addText", "label": "Add Text", "icon": "Type", "run": "addChild:text" }]
+    },
+    {
+      "type": "text",
+      "displayName": "Text",
+      "icon": "Type",
+      "defaults": { "name": "Text", "props": { "value": "Hello" } },
+      "actions": [{ "id": "rename", "label": "Rename", "run": "beginRename" }]
+    },
+    {
+      "type": "image",
+      "displayName": "Image",
+      "icon": "Image",
+      "defaults": { "name": "Image", "props": { "src": "/placeholder.png" } }
+    },
+
+    
+    {
+      "type": "3d",
+      "displayName": "3D Object",
+      "icon": "Cube",
+      "defaults": { "name": "3D Object", "props": { "modelUrl": "", "rotation": [0,0,0] } },
+      "actions": [{ "id": "center", "label": "Center Object", "run": "centerNode" }],
+      "events": { "onClick": "select" }
+    },
+    {
+      "type": "4d",
+      "displayName": "4D Hypercube",
+      "icon": "Cube",
+      "defaults": { "name": "Hypercube", "props": { "wRotation": 0.2 } },
+      "actions": [{ "id": "spinW", "label": "Spin W", "run": "spinW" }],
+      "events": { "onClick": "select" }
+    }
+  ]
+}
