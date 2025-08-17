@@ -1,0 +1,213 @@
+{
+  "$id": "https://accerox.dev/schemas/vbl.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Axer VBL (Visual Behavior & Logic)",
+  "type": "object",
+  "additionalProperties": false,
+
+  "properties": {
+    "state": { "$ref": "#/$defs/State" },
+    "nodes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Node" }
+    },
+    "edges": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Edge" }
+    },
+    "entrypoints": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Entrypoint" }
+    },
+    "types": {
+      "type": "object",
+      "description": "Optional custom type aliases for valueType strings.",
+      "additionalProperties": { "type": "string" }
+    },
+    "scheduler": { "$ref": "#/$defs/Scheduler" },
+    "topics": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "errors": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "tracing": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "modules": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "permissions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+
+  "$defs": {
+    "Value": {
+      "$ref": "./common.value.schema.json#/$defs/Value"
+    },
+
+    "State": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "signals": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Signal" }
+        }
+      }
+    },
+
+    "Signal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "key": { "type": "string", "minLength": 1 },
+        "type": { "type": "string", "minLength": 1 },
+        "initial": { "$ref": "#/$defs/Value" },
+        "persistent": { "type": "boolean" },
+        "scope": { "type": "string", "enum": ["local", "session", "global"], "default": "local" },
+        "metadata": { "type": "object", "additionalProperties": true }
+      },
+      "required": ["key", "type"]
+    },
+
+    "Node": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "type": "string", "minLength": 1 },
+        "label": { "type": ["string", "null"] },
+        "params": {
+          "type": "object",
+          "description": "Static parameters/config for the node kind; values can be literals or Value expressions.",
+          "additionalProperties": { "$ref": "#/$defs/Value" }
+        },
+        "in": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PortIn" }
+        },
+        "out": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PortOut" }
+        },
+        "traits": { "$ref": "#/$defs/Traits" },
+        "metadata": { "type": "object", "additionalProperties": true }
+      },
+      "required": ["id", "type", "in", "out"]
+    },
+
+    "PortIn": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "valueType": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "enum": ["data", "control"] },
+        "default": { "$ref": "#/$defs/Value" },
+        "variadic": { "type": "boolean" }
+      },
+      "required": ["id", "valueType", "role"]
+    },
+
+    "PortOut": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "valueType": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "enum": ["data", "control"] }
+      },
+      "required": ["id", "valueType", "role"]
+    },
+
+    "Traits": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "purity": { "type": "string", "enum": ["pure", "effect"] },
+        "idempotent": { "type": "boolean" },
+        "retry": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "retries": { "type": "integer", "minimum": 0 },
+            "backoff": { "type": "string", "enum": ["none", "fixed", "exponential"] },
+            "delayMs": { "type": "integer", "minimum": 0 },
+            "maxDelayMs": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "timeoutMs": { "type": "integer", "minimum": 0 },
+        "cache": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "ttlMs": { "type": "integer", "minimum": 0 },
+            "key": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "Edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "from": { "$ref": "#/$defs/EndpointRef" },
+        "to": { "$ref": "#/$defs/EndpointRef" },
+        "kind": { "type": "string", "enum": ["data", "control"] },
+        "when": {
+          "description": "Optional guard (Value expression resolving to boolean).",
+          "$ref": "#/$defs/Value"
+        },
+        "priority": { "type": "integer" }
+      },
+      "required": ["from", "to", "kind"]
+    },
+
+    "EndpointRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "node": { "type": "string", "minLength": 1 },
+        "port": { "type": "string", "minLength": 1 }
+      },
+      "required": ["node", "port"]
+    },
+
+    "Entrypoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "event": { "type": "string", "minLength": 1 },
+        "target": { "$ref": "#/$defs/EndpointRef" },
+        "when": { "$ref": "#/$defs/Value" }
+      },
+      "required": ["event", "target"]
+    },
+
+    "Scheduler": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tickRate": { "type": "integer", "minimum": 1 },
+        "maxConcurrency": { "type": "integer", "minimum": 1 },
+        "timeouts": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

@@ -18,7 +18,7 @@ import {
   Search,
 } from "lucide-react";
 
-import useNavbar from "@/state/navbar"; // ✅ fixed path
+import useNavbar from "@/state/navabr"; // ✅ fixed path
 import useLayers, { type TreeNode } from "@/state/layer";
 
 import { Button } from "@/components/ui/button";
@@ -34,8 +34,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 /** Menus + action bindings live in libs */
-import { MENU_CANVAS, MENU_DESIGN, type MenuJSON, type MenuValue } from "@/libs/menus";
-import { runMenuAction, type ActionCtx } from "@/libs/actions";
+import { MENU_CANVAS, MENU_DESIGN, type MenuJSON, type MenuValue } from "@/lib/sideabar/menus";
+import { runMenuAction, type ActionCtx } from "@/lib/sideabar/actions";
 
 /* ───────────────────────────── motion */
 const spring300 = { type: "spring", stiffness: 300, damping: 26 } as const;

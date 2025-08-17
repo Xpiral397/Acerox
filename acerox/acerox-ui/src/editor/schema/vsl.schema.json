@@ -1,0 +1,338 @@
+{
+  "$id": "https://accerox.dev/schemas/vsl.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Axer VSL (Visual Structure & Layout)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [],
+  "properties": {
+    "tokens": { "$ref": "#/$defs/Tokens" },
+    "assets": { "$ref": "#/$defs/Assets" },
+    "guides": { "$ref": "#/$defs/Guides" },
+    "componentTypes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ComponentType" }
+    },
+    "responsiveProps": { "$ref": "#/$defs/ResponsiveProps" },
+    "variants": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "default": { "type": "object", "additionalProperties": true },
+          "states": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "hover": { "type": "object", "additionalProperties": true },
+              "active": { "type": "object", "additionalProperties": true },
+              "disabled": { "type": "object", "additionalProperties": true },
+              "focus": {
+                "type": "object",
+                "additionalProperties": true,
+                "properties": {
+                  "ring": { "type": ["boolean", "object"] }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "world": { "$ref": "#/$defs/World" },
+    "lighting": { "$ref": "#/$defs/Lighting" },
+    "cameraRig": { "$ref": "#/$defs/CameraRig" },
+    "entities": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Entity" }
+    },
+    "annotations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+
+  "$defs": {
+    "Value": {
+      "$ref": "./common.value.schema.json#/$defs/Value"
+    },
+
+    "Tokens": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "color": { "type": "object", "additionalProperties": { "type": ["string", "object", "number", "boolean"] } },
+        "typography": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "fonts": {
+              "type": "object",
+              "additionalProperties": { "type": "string" },
+              "properties": {
+                "sans": { "type": "string" },
+                "mono": { "type": "string" }
+              }
+            },
+            "sizes": { "type": "object", "additionalProperties": { "type": "number" } },
+            "weights": { "type": "object", "additionalProperties": { "type": "number" } },
+            "lineHeights": { "type": "object", "additionalProperties": { "type": ["number", "string"] } }
+          }
+          ,
+          "required": []
+        },
+        "spacing": { "type": "object", "additionalProperties": { "type": "number" } },
+        "radii": { "type": "object", "additionalProperties": { "type": ["number", "string"] } },
+        "shadows": { "type": "object", "additionalProperties": { "type": ["string", "object"] } },
+        "borders": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "widths": { "type": "object", "additionalProperties": { "type": ["number", "string"] } }
+          }
+        },
+        "motion": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "durations": { "type": "object", "additionalProperties": { "type": "number" } },
+            "easings": { "type": "object", "additionalProperties": { "type": "string" } }
+          }
+        },
+        "breakpoints": { "type": "object", "additionalProperties": { "type": "number" } },
+        "elevation": { "type": "object", "additionalProperties": { "type": "number" } },
+        "z": { "type": "object", "additionalProperties": { "type": "number" } },
+        "focus": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ring": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "width": { "type": ["number", "string"] },
+                "color": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "Assets": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "files": { "type": "array", "items": { "$ref": "#/$defs/AssetFile" } },
+        "fonts": { "type": "array", "items": { "$ref": "#/$defs/FontAsset" } },
+        "images": { "type": "array", "items": { "$ref": "#/$defs/ImageAsset" } },
+        "icons": { "type": "array", "items": { "$ref": "#/$defs/IconAsset" } },
+        "videos": { "type": "array", "items": { "$ref": "#/$defs/VideoAsset" } },
+        "audio": { "type": "array", "items": { "$ref": "#/$defs/AudioAsset" } },
+        "meshes": { "type": "array", "items": { "$ref": "#/$defs/MeshAsset" } },
+        "materials": { "type": "array", "items": { "$ref": "#/$defs/MaterialAsset" } }
+      }
+    },
+
+    "AssetBase": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "url": { "type": "string" },
+        "kind": { "type": "string" },
+        "metadata": { "type": "object", "additionalProperties": true }
+      },
+      "required": ["id"]
+    },
+    "AssetFile": { "allOf": [ { "$ref": "#/$defs/AssetBase" } ] },
+    "FontAsset": { "allOf": [ { "$ref": "#/$defs/AssetBase" } ] },
+    "ImageAsset": { "allOf": [ { "$ref": "#/$defs/AssetBase" } ] },
+    "IconAsset": { "allOf": [ { "$ref": "#/$defs/AssetBase" } ] },
+    "VideoAsset": { "allOf": [ { "$ref": "#/$defs/AssetBase" } ] },
+    "AudioAsset": { "allOf": [ { "$ref": "#/$defs/AssetBase" } ] },
+    "MeshAsset":  { "allOf": [ { "$ref": "#/$defs/AssetBase" } ] },
+    "MaterialAsset": { "allOf": [ { "$ref": "#/$defs/AssetBase" } ] },
+
+    "Guides": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "grid": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "columns": { "type": ["integer", "null"] },
+            "gutter": { "type": ["number", "null"] },
+            "maxWidth": { "type": ["number", "null", "string"] }
+          }
+        },
+        "rulers": { "type": ["array", "null"], "items": { "type": "number" } },
+        "snap": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": ["boolean", "null"] },
+            "toGrid": { "type": ["boolean", "null"] },
+            "toGuides": { "type": ["boolean", "null"] }
+          }
+        }
+      }
+    },
+
+    "ComponentType": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "minLength": 1 },
+        "props": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "since": { "type": ["string", "null"] },
+        "deprecated": { "type": ["boolean", "null"] },
+        "a11y": { "type": "object", "additionalProperties": true }
+      },
+      "required": ["type"]
+    },
+
+    "ResponsiveProps": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "visibleAt": { "type": "array", "items": { "type": "string" } },
+        "gridCols": { "type": "object", "additionalProperties": { "type": ["integer", "string"] } }
+      }
+    },
+
+    "World": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "space": { "type": ["string", "null"] },
+        "upAxis": { "type": ["string", "null"] },
+        "unitsPerMeter": { "type": ["number", "null"] },
+        "environment": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ibl": { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
+
+    "Lighting": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ambient": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "intensity": { "type": ["number", "null"] },
+            "color": { "type": ["string", "null"] }
+          }
+        },
+        "directional": { "type": "array", "items": { "$ref": "#/$defs/LightDesc" } },
+        "point": { "type": "array", "items": { "$ref": "#/$defs/LightDesc" } },
+        "spot": { "type": "array", "items": { "$ref": "#/$defs/LightDesc" } }
+      }
+    },
+
+    "LightDesc": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "intensity": { "type": ["number", "null"] },
+        "color": { "type": ["string", "null"] },
+        "position": { "$ref": "#/$defs/Vec3" },
+        "direction": { "$ref": "#/$defs/Vec3" },
+        "angle": { "type": ["number", "null"] }
+      }
+    },
+
+    "CameraRig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": { "type": ["string", "null"] },
+        "controls": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "orbit": { "type": ["boolean", "null"] },
+            "pan": { "type": ["boolean", "null"] },
+            "zoom": { "type": ["boolean", "null"] }
+          }
+        }
+      }
+    },
+
+    "Entity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": ["string", "null"] },
+        "parentId": { "type": ["string", "null"] },
+        "children": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "visible": { "type": ["boolean", "null"] },
+        "locked": { "type": ["boolean", "null"] },
+        "isolate": { "type": ["boolean", "null"] },
+        "order": { "type": ["number", "null"] },
+        "components": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Component" }
+        },
+        "overrides": {
+          "type": "object",
+          "description": "Per-breakpoint/state overrides of component props",
+          "additionalProperties": true
+        },
+        "metadata": { "type": "object", "additionalProperties": true }
+      },
+      "required": ["id", "components"]
+    },
+
+    "Component": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "minLength": 1 },
+        "version": { "type": ["string", "null"] },
+        "enabled": { "type": ["boolean", "null"] },
+        "props": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/Value" }
+        },
+        "zIndex": { "type": ["number", "null"] },
+        "opacity": { "type": ["number", "null"] },
+        "blendMode": { "type": ["string", "null"] },
+        "maskRef": { "type": ["string", "null"] },
+        "clipPathRef": { "type": ["string", "null"] }
+      },
+      "required": ["type", "props"]
+    },
+
+    "Vec3": {
+      "type": ["array", "null"],
+      "items": { "type": "number" },
+      "minItems": 3,
+      "maxItems": 3
+    }
+  }
+}
