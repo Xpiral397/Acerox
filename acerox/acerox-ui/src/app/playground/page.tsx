@@ -4,9 +4,9 @@ import AcceroxNavbar from "@/ui/navbar/MainNavbar";
 import AcceroxSidebar from "@/ui/sidebars/board-sidebar";          // right sidebar
 import LeftHierarchySidebar from "@/ui/sidebars/left-board-sideabr";
 import { TypeRegistry } from "@/lib/registry";
- // fix typo
 import React from "react";
 
+import { Engine } from "@accerox/engine";
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">

@@ -1,0 +1,150 @@
+{
+  "$id": "https://accerox.dev/schemas/common.value.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Axer Common Value",
+  "description": "Typed values used across VSL/VBL/ASL/Backend. Supports raw primitives, atoms with type/unit, references, formulas, signals, lists, maps, and colors.",
+  "$defs": {
+    "Primitive": {
+      "description": "Raw JSON primitives are allowed directly wherever a Value is expected.",
+      "anyOf": [
+        { "type": "string" },
+        { "type": "number" },
+        { "type": "boolean" },
+        { "type": "null" }
+      ]
+    },
+
+    "Atom": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "atom" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "string", "number", "boolean", "json",
+            "dimension", "percentage", "color", "token"
+          ]
+        },
+        "unit": {
+          "type": ["string", "null"],
+          "enum": ["px", "em", "rem", "vh", "vw", "%", null]
+        },
+        "value": {}
+      },
+      "required": ["kind", "type", "value"]
+    },
+
+    "Ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "ref" },
+        "path": {
+          "type": "string",
+          "description": "JSONPath-like or dot.path reference, e.g. vsl.entities.e123.components[0].props.text"
+        },
+        "fallback": { "$ref": "#/$defs/Value" },
+        "nullable": { "type": "boolean", "default": false }
+      },
+      "required": ["kind", "path"]
+    },
+
+    "SignalRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "signal" },
+        "name": { "type": "string" },
+        "scope": { "type": "string", "enum": ["local", "view", "project", "session", "global"], "default": "local" },
+        "initial": { "$ref": "#/$defs/Value" }
+      },
+      "required": ["kind", "name"]
+    },
+
+    "Formula": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "formula" },
+        "lang": { "type": "string", "enum": ["expr", "js", "jq"], "default": "expr" },
+        "expr": { "type": "string", "minLength": 1 },
+        "args": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/Value" }
+        },
+        "returns": {
+          "type": "string",
+          "enum": ["string", "number", "boolean", "json", "color", "dimension", "percentage", "any"],
+          "default": "any"
+        },
+        "safe": { "type": "boolean", "default": true }
+      },
+      "required": ["kind", "expr"]
+    },
+
+    "Color": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "color" },
+        "value": {
+          "description": "Hex (#RRGGBB or #RRGGBBAA), rgb()/hsl()/oklch() string, or design token name",
+          "type": "string",
+          "minLength": 1
+        },
+        "space": { "type": "string", "enum": ["srgb", "display-p3", "oklab", "oklch"], "default": "srgb" },
+        "alpha": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["kind", "value"]
+    },
+
+    "List": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "list" },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Value" }
+        }
+      },
+      "required": ["kind", "items"]
+    },
+
+    "Map": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "map" },
+        "entries": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/Value" }
+        }
+      },
+      "required": ["kind", "entries"]
+    }
+  },
+
+  "oneOf": [
+    { "$ref": "#/$defs/Primitive" },
+    { "$ref": "#/$defs/Atom" },
+    { "$ref": "#/$defs/Ref" },
+    { "$ref": "#/$defs/SignalRef" },
+    { "$ref": "#/$defs/Formula" },
+    { "$ref": "#/$defs/Color" },
+    { "$ref": "#/$defs/List" },
+    { "$ref": "#/$defs/Map" }
+  ],
+
+  "examples": [
+    12,
+    "Hello",
+    { "kind": "atom", "type": "dimension", "unit": "px", "value": 16 },
+    { "kind": "ref", "path": "vsl.tokens.color.primary", "fallback": "#5B7CFF" },
+    { "kind": "formula", "lang": "expr", "expr": "x * 2", "args": { "x": 6 }, "returns": "number" },
+    { "kind": "color", "value": "#5B7CFF" },
+    { "kind": "list", "items": [1, 2, 3] },
+    { "kind": "map", "entries": { "gap": 12, "pad": 16 } }
+  ]
+}

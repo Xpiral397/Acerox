@@ -1,0 +1,297 @@
+{
+  "$id": "https://accerox.dev/schemas/asl.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Axer ASL (Application Semantic Layer)",
+  "type": "object",
+  "additionalProperties": false,
+
+  "properties": {
+    "models": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Model" }
+    },
+    "relations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Relation" }
+    },
+    "queries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Query" }
+    },
+    "validations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Validation" }
+    },
+    "viewModels": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ViewModel" }
+    },
+    "permissions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Permission" }
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+
+  "$defs": {
+    "Value": { "$ref": "./common.value.schema.json#/$defs/Value" },
+
+    "Identifier": {
+      "type": "string",
+      "minLength": 1
+    },
+
+    "DataType": {
+      "type": "string",
+      "enum": [
+        "id", "string", "text", "number", "integer", "boolean",
+        "date", "datetime", "json", "uuid", "email", "url",
+        "enum", "ref", "binary"
+      ]
+    },
+
+    "Field": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/Identifier" },
+        "name": { "type": "string", "minLength": 1 },
+        "type": { "$ref": "#/$defs/DataType" },
+        "enumValues": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "refModel": { "type": ["string", "null"] },
+        "primary": { "type": "boolean", "default": false },
+        "unique": { "type": "boolean", "default": false },
+        "nullable": { "type": "boolean", "default": false },
+        "default": { "$ref": "#/$defs/Value" },
+        "computed": { "$ref": "#/$defs/Value" },
+        "validate": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Rule" }
+        },
+        "description": { "type": ["string", "null"] },
+        "metadata": { "type": "object", "additionalProperties": true }
+      },
+      "required": ["id", "name", "type"]
+    },
+
+    "Index": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "unique": { "type": "boolean", "default": false },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "field": { "type": "string" },
+              "order": { "type": "string", "enum": ["asc", "desc"], "default": "asc" }
+            },
+            "required": ["field"]
+          }
+        },
+        "where": { "$ref": "#/$defs/Value" }
+      },
+      "required": ["fields"]
+    },
+
+    "Model": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/Identifier" },
+        "name": { "type": "string", "minLength": 1 },
+        "fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Field" }
+        },
+        "indexes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Index" }
+        },
+        "validate": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Rule" }
+        },
+        "permissions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Permission" }
+        },
+        "description": { "type": ["string", "null"] },
+        "metadata": { "type": "object", "additionalProperties": true }
+      },
+      "required": ["id", "name", "fields"]
+    },
+
+    "Relation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/Identifier" },
+        "from": { "type": "string", "description": "Model name or id" },
+        "to": { "type": "string", "description": "Model name or id" },
+        "kind": {
+          "type": "string",
+          "enum": ["one-to-one", "one-to-many", "many-to-one", "many-to-many"]
+        },
+        "via": { "type": ["string", "null"], "description": "Foreign key field on the owning side" },
+        "through": { "type": ["string", "null"], "description": "Join model for many-to-many" },
+        "onDelete": { "type": "string", "enum": ["restrict", "cascade", "set-null"], "default": "restrict" },
+        "onUpdate": { "type": "string", "enum": ["restrict", "cascade"], "default": "cascade" },
+        "metadata": { "type": "object", "additionalProperties": true }
+      },
+      "required": ["id", "from", "to", "kind"]
+    },
+
+    "QueryProjection": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+
+    "QueryOrder": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "field": { "type": "string" },
+          "dir": { "type": "string", "enum": ["asc", "desc"], "default": "asc" }
+        },
+        "required": ["field"]
+      }
+    },
+
+    "Query": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/Identifier" },
+        "name": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "description": "Model name or id" },
+        "where": { "$ref": "#/$defs/Value" },
+        "select": { "$ref": "#/$defs/QueryProjection" },
+        "orderBy": { "$ref": "#/$defs/QueryOrder" },
+        "limit": { "type": ["integer", "null"], "minimum": 0 },
+        "offset": { "type": ["integer", "null"], "minimum": 0 },
+        "joins": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "model": { "type": "string" },
+              "on": { "$ref": "#/$defs/Value" },
+              "type": { "type": "string", "enum": ["inner", "left", "right", "full"], "default": "inner" }
+            },
+            "required": ["model", "on"]
+          }
+        },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "metadata": { "type": "object", "additionalProperties": true }
+      },
+      "required": ["id", "name", "source"]
+    },
+
+    "Rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/Identifier" },
+        "rule": { "type": "string", "description": "Human description, for docs" },
+        "expr": { "$ref": "#/$defs/Value", "description": "Boolean expression Value; true means valid" },
+        "severity": { "type": "string", "enum": ["info", "warning", "error"], "default": "error" },
+        "message": { "type": "string" },
+        "metadata": { "type": "object", "additionalProperties": true }
+      },
+      "required": ["id", "expr"]
+    },
+
+    "Permission": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subject": { "type": "string", "description": "role or subject expression" },
+        "can": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["create", "read", "update", "delete", "list", "execute"] }
+        },
+        "on": {
+          "type": "array",
+          "items": { "type": "string", "description": "model ids or names; empty means global" }
+        },
+        "where": { "$ref": "#/$defs/Value", "description": "ABAC condition Value" },
+        "fields": {
+          "type": "object",
+          "description": "Field-level allow/deny",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "allow": { "type": "array", "items": { "type": "string" } },
+              "deny": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "metadata": { "type": "object", "additionalProperties": true }
+      },
+      "required": ["subject", "can"]
+    },
+
+    "ViewModel": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/Identifier" },
+        "name": { "type": "string", "minLength": 1 },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "model": { "type": "string" },
+            "query": { "type": "string" }
+          }
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "field": { "type": "string" },
+              "label": { "type": ["string", "null"] },
+              "component": { "type": ["string", "null"] },
+              "props": { "type": "object", "additionalProperties": { "$ref": "#/$defs/Value" } }
+            },
+            "required": ["field"]
+          }
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": { "$ref": "#/$defs/Identifier" },
+              "label": { "type": "string" },
+              "bind": { "$ref": "#/$defs/Value" }
+            },
+            "required": ["id", "label"]
+          }
+        },
+        "metadata": { "type": "object", "additionalProperties": true }
+      },
+      "required": ["id", "name"]
+    }
+  }
+}
